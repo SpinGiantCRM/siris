@@ -70,7 +70,7 @@ Goal: shader packs (Solas) + DLSS SR/FG on Vulkan, in the user's Lunar Client. W
   nothing changes. Dev test (Ixeris 4.6.11, 4060 Ti): old bridge ignores a click on Quit Game in the title screen
   (20 s), fixed one quits at once; in the world minimise/restore/two resizes/F11 twice all answer, presenter recreated,
   FG x2 ~300 shown / ~150 rendered afterwards; without Ixeris unchanged. Probably also the RTX 3060 "stuck in the main
-  menu" report. Version 1.3.1, not released.
+  menu" report. Released in 1.3.1.
 - FG pacing without VSync (2026-11-03): status line has `motion judder` (rms of shown interval minus the time step of the
   moment a frame pictures; frame starts, generated frames evenly between). Dev x2: 1.4-1.7 ms; simulated x4 (repeated
   images): 0.8-1.0 ms. Tried a third pacer, present at moment + delay (rising with the slowest frame, as FSR 3 does):
@@ -317,7 +317,8 @@ waiting for review. New version: POST /v2/version multipart (`data` JSON + `file
 Gallery: 6 images.
 
 Newest first:
-- v1.3.0 (2026-11-12, Latest): Frame Generation up to 6x (driver-reported), latency stat from frame start. Modrinth nItwjslA.
+- v1.3.1 (2026-11-25, Latest): Ixeris works (issue #5): presenter child window on its own thread when the game window is on another. Modrinth 3X4dI7H8.
+- v1.3.0 (2026-11-12): Frame Generation up to 6x (driver-reported), latency stat from frame start. Modrinth nItwjslA.
 - v1.2.2 (2026-11-11): Windows on Arm (PR #3, MichaelMKenny): present ids only with VSync (driver crash on Arm), bridge builds on Arm64; jar still x64 only. Modrinth saT2SUXs.
 - v1.2.1 (2026-11-11): DLSS-G motion vectors in pixels (PR #2, MichaelMKenny): no FG smear on turns, x3/x4 move. Modrinth vNjHsXyG.
 - v1.2.0 (2026-11-09): DLSS-G UI Recomposition (HUD without ghosts in generated frames), NVIDIA license metadata. Modrinth SQLIZhSf.
