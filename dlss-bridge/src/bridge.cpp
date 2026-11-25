@@ -837,6 +837,8 @@ struct Timing {
 
 struct Presenter {
     HWND window = nullptr;
+    std::thread windowThread;  // only when the game's window lives on another thread (Ixeris)
+    DWORD windowThreadId = 0;
     uint32_t width = 0;
     uint32_t height = 0;
 
@@ -1772,6 +1774,53 @@ bool waitPumping(std::unique_lock<std::mutex>& lock, double seconds, Predicate d
     return true;
 }
 
+// Mods like Ixeris run the game's window on its own thread, not the render thread. A child window made here
+// would join both threads' input queues and only answer while we wait for the presenter, so clicks, alt-tab
+// and window changes hang (issue #5). There the child gets its own thread that always answers.
+HWND createPresentWindowFor(HWND parent, uint32_t width, uint32_t height) {
+    if (GetWindowThreadProcessId(parent, nullptr) == GetCurrentThreadId()) {
+        return createPresentWindow(parent, width, height);
+    }
+    std::atomic<HWND> window{nullptr};
+    std::atomic<bool> ready{false};
+    g_present.windowThread = std::thread([&window, &ready, parent, width, height] {
+        HWND created = createPresentWindow(parent, width, height);
+        g_present.windowThreadId = GetCurrentThreadId();
+        window = created;
+        ready = true;  // window/ready belong to the caller's frame: not touched after this
+        if (!created) {
+            return;
+        }
+        MSG message;
+        while (GetMessageW(&message, nullptr, 0, 0) > 0) {
+            DispatchMessageW(&message);
+        }
+        DestroyWindow(created);
+    });
+    while (!ready) {
+        pumpSentMessages();  // creating a child can send messages to the parent's thread
+        Sleep(1);
+    }
+    return window;
+}
+
+void destroyPresentWindow() {
+    if (g_present.windowThread.joinable()) {
+        if (g_present.window) {
+            PostThreadMessageW(g_present.windowThreadId, WM_QUIT, 0, 0);
+        }
+        HANDLE handle = g_present.windowThread.native_handle();
+        while (WaitForSingleObject(handle, 1) == WAIT_TIMEOUT) {
+            pumpSentMessages();
+        }
+        g_present.windowThread.join();
+        g_present.windowThreadId = 0;
+    } else if (g_present.window) {
+        DestroyWindow(g_present.window);
+    }
+    g_present.window = nullptr;
+}
+
 }  // namespace
 
 SIRIS_API void siris_presenter_destroy() {
@@ -1864,10 +1913,7 @@ SIRIS_API void siris_presenter_destroy() {
         CloseHandle(g_present.frameTimer);
         g_present.frameTimer = nullptr;
     }
-    if (g_present.window) {
-        DestroyWindow(g_present.window);
-        g_present.window = nullptr;
-    }
+    destroyPresentWindow();
     g_present.jobs.clear();
     g_present.stop = false;
     g_present.nextSlot = 0;
@@ -1895,7 +1941,7 @@ SIRIS_API int32_t siris_presenter_create(uint64_t parentHwnd, uint32_t width, ui
     g_present.statsStart = now();
 
     HWND parent = reinterpret_cast<HWND>(parentHwnd);
-    g_present.window = createPresentWindow(parent, width, height);
+    g_present.window = createPresentWindowFor(parent, width, height);
     if (!g_present.window) {
         return fail(SIRIS_DEVICE_FAILED, "child window creation failed");
     }

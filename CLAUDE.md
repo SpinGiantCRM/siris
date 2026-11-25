@@ -62,6 +62,15 @@ Goal: shader packs (Solas) + DLSS SR/FG on Vulkan, in the user's Lunar Client. W
   answers messages sent to the child window while it waits, also at shutdown (`pumpSentMessages`; probably the old
   watchdog crash in `destroyPresenter`), acquire 100 ms instead of forever, present wait dropped after 3 timeouts (each
   cost 200 ms; status line says `present wait stuck`). Need that friend's `latest.log` to know more.
+- Ixeris (issue #5, fixed 2026-11-25): Ixeris runs the game window on the main thread and renders on another.
+  The presenter's child window was created on the render thread, so Windows joined both threads' input queues and the
+  child only answered messages while we waited for the presenter: no clicks in the main menu, freezes on alt-tab,
+  resolution or fullscreen changes. Now, when the parent window belongs to another thread, the child window gets its
+  own thread with a message loop (`createPresentWindowFor`/`destroyPresentWindow` in bridge.cpp); without Ixeris
+  nothing changes. Dev test (Ixeris 4.6.11, 4060 Ti): old bridge ignores a click on Quit Game in the title screen
+  (20 s), fixed one quits at once; in the world minimise/restore/two resizes/F11 twice all answer, presenter recreated,
+  FG x2 ~300 shown / ~150 rendered afterwards; without Ixeris unchanged. Probably also the RTX 3060 "stuck in the main
+  menu" report. Version 1.3.1, not released.
 - FG pacing without VSync (2026-11-03): status line has `motion judder` (rms of shown interval minus the time step of the
   moment a frame pictures; frame starts, generated frames evenly between). Dev x2: 1.4-1.7 ms; simulated x4 (repeated
   images): 0.8-1.0 ms. Tried a third pacer, present at moment + delay (rising with the slowest frame, as FSR 3 does):
@@ -142,7 +151,7 @@ Goal: shader packs (Solas) + DLSS SR/FG on Vulkan, in the user's Lunar Client. W
   approved downloads, sha512 checked against Modrinth): Lithium 0.26.3, More Culling 1.9.0 (+ Cloth Config from
   surv), Better Block Entities 1.4.0 (from surv, built for Sodium 0.9.3-beta.1): same world 185-199 shown /
   89-103 rendered, 1 % low 112-126 shown (was 98-108), worst join pause 446 ms (was 958/1658 ms), no errors.
-  Not recommended for this setup: Nvidium (OpenGL only), AsyncParticles, Gnetum (HUD lag with FG), Ixeris,
+  Not recommended for this setup: Nvidium (OpenGL only), AsyncParticles, Gnetum (HUD lag with FG), Ixeris (see issue #5 note),
   borderless-fullscreen mods (presenter), DH (LODs like Voxy).
 - Lunar profile `just-optimized` (2026-11-09): Voxygen 3.0.0 (`voxyworldgenv3`, LOD generator for Voxy) crashes the
   integrated server with VMP (Very Many Players): both @Redirect `ChunkMap.isChunkTracked` in
