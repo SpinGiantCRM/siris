@@ -5,11 +5,13 @@
   "plugin": "com.siris.LunarCompat",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "AttachmentViewMixin",
     "CameraMixin",
     "GameRendererMixin",
     "HudMixin",
     "LevelExtractorMixin",
     "MinecraftMixin",
+    "RenderingAttachmentMixin",
     "StagedVertexBufferPoolMixin",
     "DebugEntrySystemSpecsMixin",
     "DevTestWorldMixin",
