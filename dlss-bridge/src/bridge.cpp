@@ -389,6 +389,10 @@ SIRIS_API int32_t siris_create_device(uint64_t gipaAddress, uint64_t instanceHan
     }
     bool opticalFlowExt = hasExtension(available, VK_NV_OPTICAL_FLOW_EXTENSION_NAME);
     if (opticalFlowExt) {
+        // RenderPearl requests Vulkan 1.2, before format feature flags 2 became core.
+        if (hasExtension(available, VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME)) {
+            addUnique(names, VK_KHR_FORMAT_FEATURE_FLAGS_2_EXTENSION_NAME);
+        }
         addUnique(names, VK_NV_OPTICAL_FLOW_EXTENSION_NAME);
     }
     // The presenter paces frames on when they actually reach the screen (VK_KHR_present_wait).
