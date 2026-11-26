@@ -317,7 +317,8 @@ waiting for review. New version: POST /v2/version multipart (`data` JSON + `file
 Gallery: 6 images.
 
 Newest first:
-- v1.3.2 (2026-11-26, Latest): `VK_KHR_format_feature_flags2` with optical flow (PR #6, SpinGiantCRM; validation VUID-01387 on Vulkan 1.2). Modrinth rphMDZvq.
+- v1.3.3 (2026-11-26, Latest): single-mip attachment views for render passes (PR #7, SpinGiantCRM; VUID-12486 with mipmapped pack targets; @WrapOperation added by us). Modrinth hX58uGFI.
+- v1.3.2 (2026-11-26): `VK_KHR_format_feature_flags2` with optical flow (PR #6, SpinGiantCRM; validation VUID-01387 on Vulkan 1.2). Modrinth rphMDZvq.
 - v1.3.1 (2026-11-25): Ixeris works (issue #5): presenter child window on its own thread when the game window is on another. Modrinth 3X4dI7H8.
 - v1.3.0 (2026-11-12): Frame Generation up to 6x (driver-reported), latency stat from frame start. Modrinth nItwjslA.
 - v1.2.2 (2026-11-11): Windows on Arm (PR #3, MichaelMKenny): present ids only with VSync (driver crash on Arm), bridge builds on Arm64; jar still x64 only. Modrinth saT2SUXs.
